@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Designing the conversation, not the chatbot — Caroline Maillols</title>
+<meta name="description" content="A pet project: an AI voice concierge for short-term rentals, built solo on my own Airbnb. The defensible thing was never the knowledge base. It was how it talks.">
+
+<!-- ============================================================
+     REPLACING THE SCREENSHOT PLACEHOLDERS
+     Each placeholder looks like:
+       <div class="slot"> ... </div>
+     Replace the whole block with:
+       <img class="shot" src="images/your-file.png" alt="Short description">
+     Keep the <figcaption> underneath — it does real work.
+     ============================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#E7E7E3;
+  --panel:#DCDCD6;
+  --card:#F4F4F1;
+  --ink:#16171A;
+  --ink-soft:#55575C;
+  --hair:#C3C3BC;
+  --blue:#2A2FA8;
+  --red:#9E2B25;
+
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Newsreader",Georgia,serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--body);font-size:1.0625rem;line-height:1.62;font-weight:400;
+}
+img{max-width:100%;display:block}
+
+.wrap{max-width:1160px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+.rule{border:0;border-top:1px solid var(--hair);margin:0}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.028em;line-height:.98;margin:0}
+h1{font-size:clamp(2.5rem,6.6vw,4.9rem)}
+h2{font-size:clamp(1.75rem,3.9vw,2.9rem);letter-spacing:-.026em}
+h3{font-size:clamp(1.15rem,2vw,1.42rem);letter-spacing:-.018em;line-height:1.12}
+
+.eyebrow{
+  font-family:var(--mono);font-size:.66rem;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 1.4rem;
+}
+.lede{font-size:clamp(1.15rem,2vw,1.42rem);line-height:1.5;font-weight:300;max-width:34ch}
+p{margin:0 0 1.05em;max-width:62ch}
+p:last-child{margin-bottom:0}
+strong{font-weight:500;color:var(--ink)}
+a{color:var(--blue)}
+
+.section{padding:clamp(64px,9vw,124px) 0}
+.section-head{margin-bottom:clamp(34px,5vw,60px)}
+.section-head p{margin-top:1.1rem;color:var(--ink-soft);max-width:52ch;font-size:1.1rem}
+
+/* ---------- masthead ---------- */
+.mast{display:flex;justify-content:space-between;align-items:baseline;gap:1.5rem;
+  padding:22px 0;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.mast .who{font-family:var(--display);font-weight:700;font-size:1rem;letter-spacing:-.02em}
+.mast .meta{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(56px,8vw,104px) 0 clamp(48px,6vw,80px)}
+.hero h1{max-width:16ch}
+.hero .lede{margin-top:1.8rem;color:var(--ink-soft)}
+.stamp{display:inline-block;margin-top:2.2rem;
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--blue);border:1px solid var(--blue);border-radius:2px;padding:.45em .8em}
+
+/* ---------- transcripts ---------- */
+.scene{background:var(--card);border:1px solid var(--hair);padding:clamp(22px,3.5vw,40px)}
+.scene-time{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-soft);margin:0 0 1.6rem}
+
+.turn{display:grid;gap:.9rem 2rem;align-items:start;grid-template-columns:1fr;margin-bottom:1.6rem}
+.turn:last-child{margin-bottom:0}
+@media(min-width:900px){.turn{grid-template-columns:minmax(0,1fr) 15.5rem}}
+
+.speaker{font-family:var(--mono);font-size:.62rem;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-soft);margin:0 0 .5rem}
+.speech{background:var(--panel);padding:.95rem 1.15rem;border-radius:3px;
+  font-size:1.06rem;line-height:1.52;max-width:46ch}
+.speech p{margin:0 0 .6em;max-width:none}
+.speech p:last-child{margin-bottom:0}
+.answer{background:#fff;border-left:2px solid var(--blue);max-width:48ch}
+.answer.rejected{border-left-color:var(--red);color:#3E4045}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:.58rem;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;padding:.32em .6em;border-radius:2px;margin-bottom:.7rem}
+.tag.red{color:var(--red);border:1px solid var(--red)}
+.tag.blue{color:var(--blue);border:1px solid var(--blue)}
+
+.mark{font-family:var(--mono);font-size:.72rem;line-height:1.6;color:var(--blue);
+  padding-top:.2rem;position:relative}
+.mark::before{content:"";position:absolute;left:-1.1rem;top:.62rem;width:.65rem;height:1px;background:var(--blue)}
+.mark.red{color:var(--red)}
+.mark.red::before{background:var(--red)}
+.mark span{display:block;margin-bottom:.85rem}
+.mark span:last-child{margin-bottom:0}
+@media(max-width:899px){
+  .mark{border-left:1px solid var(--blue);padding-left:.9rem}
+  .mark.red{border-left-color:var(--red)}
+  .mark::before{display:none}
+}
+
+.split{display:grid;gap:1.6rem;margin-top:1.6rem}
+@media(min-width:1000px){.split{grid-template-columns:1fr 1fr;gap:2.4rem}}
+
+/* ---------- two-column blocks ---------- */
+.paths{display:grid;gap:0;border-top:1px solid var(--hair)}
+@media(min-width:860px){.paths{grid-template-columns:1fr 1fr}}
+.path{padding:2.4rem 0;border-bottom:1px solid var(--hair)}
+@media(min-width:860px){
+  .path:first-child{padding-right:3rem;border-right:1px solid var(--hair)}
+  .path:last-child{padding-left:3rem}
+}
+.path h3{margin-bottom:1.3rem}
+.path ul{list-style:none;margin:0;padding:0}
+.path li{padding:.7rem 0;border-bottom:1px solid var(--hair);font-size:1.02rem;color:var(--ink-soft)}
+.path li:last-child{border-bottom:0}
+.path .verdict{margin-top:1.4rem;font-family:var(--mono);font-size:.72rem;line-height:1.6}
+.path--red .verdict{color:var(--red)}
+.path--blue .verdict{color:var(--blue)}
+
+/* ---------- decisions ---------- */
+.decision{display:grid;gap:1.6rem 3rem;padding:clamp(34px,5vw,54px) 0;border-top:1px solid var(--hair)}
+@media(min-width:900px){.decision{grid-template-columns:minmax(0,20rem) minmax(0,1fr)}}
+.decision .d-head .kicker{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--blue);margin:0 0 .8rem}
+.decision .d-head h3{margin-bottom:.9rem}
+.decision .d-head p{font-size:1rem;color:var(--ink-soft)}
+.mini{background:var(--card);border:1px solid var(--hair);padding:1.4rem 1.5rem}
+.mini + .mini{margin-top:1rem}
+
+/* ---------- rules ---------- */
+.rules{display:grid;gap:0;border-top:1px solid var(--hair)}
+@media(min-width:760px){.rules{grid-template-columns:1fr 1fr;column-gap:3rem}}
+.rules .r{padding:1.35rem 0;border-bottom:1px solid var(--hair)}
+.rules .r .n{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;color:var(--blue);
+  display:block;margin-bottom:.5rem}
+.rules .r b{font-family:var(--display);font-weight:700;font-size:1.06rem;letter-spacing:-.015em;
+  display:block;margin-bottom:.35rem}
+.rules .r p{font-size:.99rem;color:var(--ink-soft);margin:0;max-width:44ch}
+
+/* ---------- steps / ladder ---------- */
+.steps{display:grid;gap:1.4rem}
+@media(min-width:900px){.steps{grid-template-columns:repeat(3,1fr);gap:2rem}}
+.step{background:var(--card);border:1px solid var(--hair);padding:1.5rem}
+.step .n{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--blue);display:block;margin-bottom:.9rem}
+.step h4{font-family:var(--display);font-weight:700;font-size:1.1rem;letter-spacing:-.02em;
+  line-height:1.14;margin:0 0 .6rem}
+.step p{font-size:.99rem;color:var(--ink-soft);margin:0}
+
+/* ---------- stack ---------- */
+.stack{border-top:1px solid var(--hair)}
+.stack .row{display:grid;gap:.3rem 2rem;padding:1.15rem 0;border-bottom:1px solid var(--hair);align-items:baseline}
+@media(min-width:820px){.stack .row{grid-template-columns:11rem 13rem minmax(0,1fr)}}
+.stack .role{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+.stack .pick{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:-.018em}
+.stack .why{font-size:.99rem;color:var(--ink-soft);margin:0;max-width:52ch}
+
+/* ---------- ledger ---------- */
+.ledgers{display:grid;gap:clamp(28px,4vw,44px)}
+@media(min-width:900px){.ledgers{grid-template-columns:1fr 1fr;gap:3rem}}
+.ledger h3{margin-bottom:1.1rem}
+.ledger .l{display:flex;justify-content:space-between;align-items:baseline;gap:1.5rem;
+  padding:.78rem 0;border-bottom:1px solid var(--hair)}
+.ledger .l:first-of-type{border-top:1px solid var(--hair)}
+.ledger .l .k{font-size:1rem;color:var(--ink-soft);max-width:26ch}
+.ledger .l .v{font-family:var(--mono);font-size:.9rem;font-weight:500;white-space:nowrap;text-align:right}
+.ledger .l.total .v{color:var(--blue)}
+.ledger .l.total .k{color:var(--ink)}
+
+/* ---------- screenshot slots ---------- */
+.shots{display:grid;gap:clamp(30px,4vw,48px)}
+@media(min-width:900px){.shots{grid-template-columns:1fr 1fr}}
+figure{margin:0}
+.slot{border:1.5px dashed var(--blue);background:rgba(42,47,168,.035);
+  padding:1.5rem;aspect-ratio:16/10;display:flex;flex-direction:column;justify-content:space-between}
+.slot .slot-no{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blue)}
+.slot h4{font-family:var(--display);font-weight:700;font-size:1.12rem;letter-spacing:-.02em;
+  margin:.9rem 0 .7rem;line-height:1.15}
+.slot ul{margin:0;padding-left:1.05rem;font-family:var(--mono);font-size:.7rem;line-height:1.75;color:var(--blue)}
+.slot .spec{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--blue);opacity:.75;margin-top:1rem}
+.shot{border:1px solid var(--hair)}
+figcaption{margin-top:.85rem;font-size:.98rem;color:var(--ink-soft);line-height:1.5;max-width:48ch}
+
+/* ---------- status ---------- */
+.status{display:grid;gap:1.6rem;margin-top:2.4rem}
+@media(min-width:820px){.status{grid-template-columns:repeat(3,1fr);gap:2rem}}
+.status .item{border-top:2px solid var(--ink);padding-top:1rem}
+.status .item .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-soft);margin:0 0 .6rem}
+.status .item p{font-size:1rem;margin:0}
+
+.pull{font-family:var(--display);font-weight:500;font-size:clamp(1.5rem,3.4vw,2.35rem);
+  line-height:1.14;letter-spacing:-.025em;max-width:22ch;margin:0}
+
+/* ---------- footer ---------- */
+footer{padding:clamp(48px,6vw,80px) 0 clamp(40px,5vw,64px);border-top:1px solid var(--hair)}
+footer .f-grid{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:flex-end}
+footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);line-height:2}
+
+/* ---------- motion ---------- */
+.rise{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.3,1)}
+.rise.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rise{opacity:1;transform:none;transition:none}}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <span class="who">Caroline Maillols</span>
+    <span class="meta">Product &amp; service design · Sydney</span>
+  </header>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<div class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Pet project · AI voice concierge for short-term rentals</p>
+    <h1>The property should explain itself.</h1>
+    <p class="lede">Nights and weekends, no team, no funding. I designed the conversation the way you would design an interface — and the whole product came out different.</p>
+    <span class="stamp">Blue marks are the design decisions</span>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="scene rise">
+    <p class="scene-time">11.41pm · Second night of a four-night stay · Two adults, one toddler</p>
+
+    <div class="turn">
+      <div>
+        <p class="speaker">Guest</p>
+        <div class="speech"><p>the heater isn't working</p></div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="turn">
+        <div>
+          <span class="tag red">Not built</span>
+          <div class="speech answer rejected">
+            <p>I'm sorry to hear that! Here are some troubleshooting steps for your heating system:</p>
+            <p>1. Check the thermostat is set to HEAT<br>
+               2. Verify the circuit breaker hasn't tripped<br>
+               3. Ensure the pilot light is lit<br>
+               4. Replace the air filter if it looks dirty</p>
+            <p>Let me know if this helps!</p>
+          </div>
+        </div>
+        <aside class="mark red">
+          <span>Generic. Could be any house on earth.</span>
+          <span>Four steps for someone holding a phone in the dark.</span>
+          <span>"Let me know if this helps" puts the work back on the guest.</span>
+        </aside>
+      </div>
+
+      <div class="turn">
+        <div>
+          <span class="tag blue">Built</span>
+          <div class="speech answer">
+            <p>That's annoying, especially at this hour.</p>
+            <p>Are you at the wall panel in the hallway, or holding the remote from the lounge?</p>
+          </div>
+        </div>
+        <aside class="mark">
+          <span>Name the feeling before solving anything.</span>
+          <span>One question. Not four instructions.</span>
+          <span>Locate the person in the room first — every later step depends on which control they're touching.</span>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== PROBLEM ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The problem</p>
+      <h2>Both sides of the booking are<br>losing at 11.41pm.</h2>
+    </div>
+
+    <div class="paths">
+      <div class="path">
+        <h3>The guest</h3>
+        <p>Dropped into a house they have never been in, usually after a long drive, often with tired children. The friction is never the big things. It is the wall panel with eleven buttons, the tap that runs cold for twenty seconds, the door that needs a firm push.</p>
+        <p>Small questions, terrible timing.</p>
+      </div>
+      <div class="path">
+        <h3>The host</h3>
+        <p>Answering the same six questions for the four hundredth time, after hours, from a dinner table. Every answer already exists — in their head. Nowhere else.</p>
+        <p>The property managers I spoke to called it the tax on growing the portfolio.</p>
+      </div>
+    </div>
+
+    <div class="ledgers" style="margin-top:clamp(38px,5vw,60px)">
+      <div class="ledger">
+        <h3>How many questions, really</h3>
+        <div class="l"><span class="k">Guest questions per booking, typical stay</span><span class="v">3–7</span></div>
+        <div class="l"><span class="k">Where the instructions are genuinely good</span><span class="v">1–3</span></div>
+        <div class="l"><span class="k">Where the property has friction</span><span class="v">8+</span></div>
+        <div class="l"><span class="k">Per property, per year</span><span class="v">~100</span></div>
+        <div class="l total"><span class="k">Across a 50-property portfolio</span><span class="v">~750 / mo</span></div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:1.1rem">But the total was never the problem</h3>
+        <p>Check-ins cluster. Friday afternoon, Sunday changeover, the first morning of school holidays. Twenty properties turn over inside the same ninety minutes, and every one of those guests meets the same unfamiliar wall panel at the same time.</p>
+        <p>A manager cannot staff for that peak — the team would sit idle for the rest of the week — so they staff for the average, and a queue forms. It forms precisely during check-in, which is the ninety minutes that sets the tone for the entire stay.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(28px,3.5vw,42px)" class="mini rise">
+      <div class="turn">
+        <div>
+          <p class="speaker">Why this is a bottleneck, not a workload</p>
+          <div class="speech answer"><p>Spread across a month, 750 messages is a manageable job. Half of them landing between 3pm and 5pm on a Friday is not.</p></div>
+        </div>
+        <aside class="mark">
+          <span>Software has no peak. That is the real argument for building this — not that it answers, but that it answers a hundred people at once on a long weekend without anyone waiting.</span>
+          <span>It is also why response time mattered more to me than answer breadth.</span>
+        </aside>
+      </div>
+    </div>
+
+    <p style="margin-top:clamp(38px,5vw,60px)" class="pull">A short-term rental runs on knowledge that lives in one person's head and is only available when that person is awake.</p>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== WHERE IT CAME FROM ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">Where it came from</p>
+      <h2>I'm the user.</h2>
+      <p>I host my own place on Airbnb. This started as an itch about my own guests, then two property managers said they wanted it, which is the point a side project stops being a toy.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="n">Alpha · my house</span>
+        <h4>Break it where it costs nothing</h4>
+        <p>My own listing, my own appliances, my own guests. Every awkward answer was mine to sit with, which is a much faster feedback loop than a survey. The first version of the behaviour spec came almost entirely from reading back my own message history.</p>
+      </div>
+      <div class="step">
+        <span class="n">Beta · managed property</span>
+        <h4>Someone else's revenue on the line</h4>
+        <p>A Hunter Valley property manager offered a live property with real bookings on Airbnb and direct. Real guests, real reviews, real consequences — and a manager willing to commit to rolling it across the portfolio if it held up.</p>
+      </div>
+      <div class="step">
+        <span class="n">Next · boutique platform</span>
+        <h4>The multi-property workflow</h4>
+        <p>A second manager, running a boutique platform, lined up to test what changes when one person maintains twenty properties instead of one. Different product entirely: bulk setup, shared appliance library, portfolio-level review.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(34px,4.5vw,54px)" class="mini rise">
+      <div class="turn">
+        <div>
+          <p class="speaker">Why sell to managers, not owners</p>
+          <div class="speech answer"><p>A manager with fifty properties is one conversation. Fifty individual owners is fifty conversations, fifty setups, and fifty churn risks.</p></div>
+        </div>
+        <aside class="mark">
+          <span>Managers already charge owners 15–20% to run the property. They have an existing commercial relationship to bundle this into.</span>
+          <span>They also feel the pain hourly rather than occasionally, which shortens the sales conversation considerably.</span>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== TWO PATHS ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The approach</p>
+      <h2>Two ways to start this build.</h2>
+      <p>Both produce a working product. Only one of them produces a product a property manager will put in front of a paying guest.</p>
+    </div>
+
+    <div class="paths">
+      <div class="path path--red">
+        <h3>Feature-led</h3>
+        <ul>
+          <li>What can the model do?</li>
+          <li>What are competitors shipping?</li>
+          <li>How fast can we plug into the PMS?</li>
+          <li>How much of the host's inbox can we deflect?</li>
+        </ul>
+        <p class="verdict">→ You end up with an FAQ bot with a nicer voice. It optimises the host's inbox, not the guest's night. And it is exactly the thing the booking platforms can ship themselves in a quarter.</p>
+      </div>
+      <div class="path path--blue">
+        <h3>User-led</h3>
+        <ul>
+          <li>What is the guest actually feeling at 11.41pm?</li>
+          <li>What does a host need to see before they trust this with a real guest?</li>
+          <li>Where does confident help become dangerous help?</li>
+          <li>When should this thing stop talking?</li>
+        </ul>
+        <p class="verdict">→ You end up designing behaviour rather than features. The knowledge base becomes table stakes and the way it talks becomes the product.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== DECISIONS ===================== -->
+<div class="wrap">
+  <section class="section" style="padding-bottom:clamp(30px,4vw,50px)">
+    <div class="section-head">
+      <p class="eyebrow">Conversation design</p>
+      <h2>The interface here is<br>a conversation.</h2>
+      <p>So it got the same treatment an interface would: states, transitions, failure modes, exits. Four decisions carried the most weight, and each one cost something — a feature, a metric, or setup speed.</p>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Decision 01</p>
+      <h3>Read the person's confidence, not the manual's step count</h3>
+      <p>Progressive disclosure, applied to speech. An unsure guest gets one instruction and a pause. A confident guest gets the whole picture and is trusted to run with it. Any signal of confusion — "which one?", "nothing happened" — drops it straight back to one step at a time.</p>
+    </div>
+    <div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <p class="speaker">Concierge · unsure guest</p>
+            <div class="speech answer"><p>Find the mode button — it's on the right edge of the remote. You there?</p></div>
+          </div>
+          <aside class="mark"><span>One thing. Then stop and wait.</span></aside>
+        </div>
+      </div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <p class="speaker">Concierge · confident guest</p>
+            <div class="speech answer"><p>Set it to COOL, 22°, fan on AUTO. That's the sweet spot for this house.</p></div>
+          </div>
+          <aside class="mark"><span>Same information. Hand-holding removed because they earned it.</span></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Decision 02</p>
+      <h3>Patience is a property of the object, not the conversation</h3>
+      <p>A light switch and a spa are not the same conversation. Every appliance carries a difficulty rating from 1 to 5, set during setup, and that rating decides how long the concierge stays patient before handing over to a human.</p>
+    </div>
+    <div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <p class="speaker">Rating logic</p>
+            <div class="speech answer">
+              <p><strong>1–2</strong> · simple lock, standard dishwasher — hand over after two failed attempts</p>
+              <p><strong>3</strong> · household AC, smart TV — hand over after three or four</p>
+              <p><strong>4–5</strong> · spa, zoned climate, premium coffee — stay patient far longer, unless there is a safety flag, in which case hand over immediately</p>
+            </div>
+          </div>
+          <aside class="mark"><span>Stops the two failure modes at once: giving up on someone too early, and letting them flounder for fifteen minutes on something genuinely hard.</span></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Decision 03</p>
+      <h3>Troubleshoot in the guest's order, not the technician's</h3>
+      <p>Device before network before equipment. Nobody gets sent to find a router until their own phone has been ruled out — because being marched to a cupboard for nothing is how a small problem becomes a bad review.</p>
+    </div>
+    <div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <span class="tag red">Not built</span>
+            <div class="speech answer rejected"><p>Sounds like the router. It's in the hallway cupboard — unplug it, wait thirty seconds, plug it back in.</p></div>
+          </div>
+          <aside class="mark red"><span>Jumps three levels. If their wifi was simply switched off, you have just sent someone into a cupboard at midnight for nothing.</span></aside>
+        </div>
+      </div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <span class="tag blue">Built</span>
+            <div class="speech answer"><p>Before we go near the router — when you open your wifi list, does the network show up at all?</p></div>
+          </div>
+          <aside class="mark"><span>Cheapest check first. It also signals that this thing is working through something, not guessing.</span></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Decision 04</p>
+      <h3>Knowing when to stop talking</h3>
+      <p>After an emergency, or after a guest signals they are done, the concierge gives a statement and then goes silent. No closing question. This is the decision I am most sure about and the one an engagement metric would never have produced.</p>
+    </div>
+    <div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <span class="tag red">Not built</span>
+            <div class="speech answer rejected"><p>Open the windows to clear the smoke. I've alerted the host. Is it clearing yet? Anything else I can help with?</p></div>
+          </div>
+          <aside class="mark red"><span>Two questions asked of someone standing under a screaming smoke alarm.</span></aside>
+        </div>
+      </div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <span class="tag blue">Built</span>
+            <div class="speech answer"><p>Open the doors and windows to clear the air. If the alarm is still going or you can smell smoke, call 000 now. I'm letting your host know.</p></div>
+          </div>
+          <aside class="mark"><span>Then nothing. The handover is the end of the thread, not a pause in it.</span></aside>
+        </div>
+      </div>
+      <div class="mini">
+        <div class="turn">
+          <div>
+            <p class="speaker">Same rule, softer case</p>
+            <div class="speech answer"><p>Guest: "all good, I'll figure it out"<br>Concierge: "Fair enough. I'm here if you need me."</p></div>
+          </div>
+          <aside class="mark"><span>A boundary gets acknowledged once, as a statement. Never followed with another question.</span></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== THE SPEC ===================== -->
+<div class="wrap">
+  <section class="section" style="padding-top:clamp(50px,7vw,90px)">
+    <div class="section-head">
+      <p class="eyebrow">The behaviour spec</p>
+      <h2>Eight rules it is written to.</h2>
+      <p>Roughly two thousand words specifying not what the concierge knows, but how it behaves. This was the real deliverable — the knowledge base is just content poured into it.</p>
+    </div>
+
+    <div class="rules">
+      <div class="r"><span class="n">01</span><b>Listen before instructing</b>
+        <p>Ask what they can see before telling them what to press. Half of reported faults turn out to be something other than the fault.</p></div>
+      <div class="r"><span class="n">02</span><b>Put everything in space</b>
+        <p>Never "the control panel". Always "the panel above the window, mode button on its right edge." Guests are standing in a room, not reading a manual.</p></div>
+      <div class="r"><span class="n">03</span><b>Name the feeling first</b>
+        <p>"That's annoying" costs one line and changes the whole exchange. Frustration handled badly turns a five-minute fix into a review.</p></div>
+      <div class="r"><span class="n">04</span><b>Explain the quirk, don't hide it</b>
+        <p>"It runs cold for about twenty seconds — that's normal here." Naming the oddity in advance stops it becoming a fault report.</p></div>
+      <div class="r"><span class="n">05</span><b>Definite about objects, honest about doubt</b>
+        <p>"The panel swings open," not "should swing open." But when it genuinely doesn't know: "I'm not certain — try it and tell me what comes up."</p></div>
+      <div class="r"><span class="n">06</span><b>One question at a time</b>
+        <p>Three questions in one message reads as a form. People answer the last one and ignore the rest.</p></div>
+      <div class="r"><span class="n">07</span><b>One topic at a time</b>
+        <p>Finish the heater before mentioning the bins. Helpfulness that arrives unrequested is noise.</p></div>
+      <div class="r"><span class="n">08</span><b>Hand over cleanly</b>
+        <p>Say who is being contacted, and when to expect them. An unexplained handover feels like being dropped.</p></div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== SETUP ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The other user</p>
+      <h2>The host is doing this at 9pm<br>after a turnover.</h2>
+      <p>Every product in this category dies at setup. If it feels like homework, the host never finishes, and an unfinished knowledge base is worse than none — it gives confident answers about half a house. So setup was designed against a single rule: photograph and tap, don't type.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="n">Photograph</span>
+        <h4>The appliance identifies itself</h4>
+        <p>A photo of the air conditioner returns the make, model and model number, pulls the manual, and drafts the guide, the difficulty rating and the safety notes. If the badge is unreadable it asks for the model number. If the unit is too old, it asks the host to record thirty seconds of video instead.</p>
+      </div>
+      <div class="step">
+        <span class="n">Tap</span>
+        <h4>Everything routine is a picker</h4>
+        <p>Bin nights, check-in and check-out times, house rules, parking. All of it is selected from common setups rather than written out. The address alone produces the local defaults — emergency number, nearest hospital, collection days, what is nearby.</p>
+      </div>
+      <div class="step">
+        <span class="n">Talk</span>
+        <h4>Only the quirks are asked for</h4>
+        <p>The one thing no system can infer is what lives in the host's head: the door that needs a firm push, the tap that runs cold. So the interview asks for exactly that, out loud, and nothing else. It is the shortest part of setup and the highest-value data in the product.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(34px,4.5vw,54px)" class="mini rise">
+      <div class="turn">
+        <div>
+          <p class="speaker">The one deliberate friction</p>
+          <div class="speech answer"><p>The system drafts. It never publishes. Nothing reaches a guest until a named human has read it and pressed approve.</p></div>
+        </div>
+        <aside class="mark">
+          <span>This cost me the "live in five minutes" pitch, and I kept it anyway.</span>
+          <span>Approval is what creates the accountability trail. No manager hands a stranger's holiday to software they cannot vouch for.</span>
+          <span>It also compounds: the second property is far faster than the first, because appliances repeat across a portfolio.</span>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== WHAT I BUILT ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">What I built</p>
+      <h2>Alpha, running on a real house.</h2>
+      <p>Designed and built solo. Voice and text, booking-aware, with a host console behind it.</p>
+    </div>
+
+    <div class="shots">
+
+      <figure>
+        <div class="slot">
+          <span class="slot-no">Screenshot 01</span>
+          <div>
+            <h4>Guest chat, mid-troubleshoot</h4>
+            <ul>
+              <li>Four or five turns visible, not one</li>
+              <li>Show the concierge asking a question back</li>
+              <li>Mobile frame — that is where guests are</li>
+              <li>Use a real appliance from the house</li>
+            </ul>
+          </div>
+          <span class="spec">1200 × 750 · replace this block with &lt;img class="shot"&gt;</span>
+        </div>
+        <figcaption>The guest surface. No app, no account — a link in the check-in message.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="slot">
+          <span class="slot-no">Screenshot 02</span>
+          <div>
+            <h4>Photo → appliance, awaiting approval</h4>
+            <ul>
+              <li>The uploaded photo beside the drafted fields</li>
+              <li>Model number, difficulty rating, safety notes filled</li>
+              <li>Approve state clearly unpressed</li>
+            </ul>
+          </div>
+          <span class="spec">1200 × 750 · the money shot — show the draft, not the result</span>
+        </div>
+        <figcaption>Setup. The system does the typing; the host does the deciding.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="slot">
+          <span class="slot-no">Screenshot 03</span>
+          <div>
+            <h4>Voice, mid-listen</h4>
+            <ul>
+              <li>Capture the active listening state, not idle</li>
+              <li>Transcript partially formed underneath</li>
+              <li>Crop tight — this one is about the moment</li>
+            </ul>
+          </div>
+          <span class="spec">1200 × 750</span>
+        </div>
+        <figcaption>Voice in, voice out. Hands full, arms full of luggage, lights off.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="slot">
+          <span class="slot-no">Screenshot 04</span>
+          <div>
+            <h4>Booking-aware personalisation</h4>
+            <ul>
+              <li>Booking record on one side, greeting on the other</li>
+              <li>Guest name, dates and party size visibly in play</li>
+              <li>Redact the real guest's surname</li>
+            </ul>
+          </div>
+          <span class="spec">1200 × 750</span>
+        </div>
+        <figcaption>The concierge knows who is in the house, how long for, and whether there are children.</figcaption>
+      </figure>
+
+      <figure style="grid-column:1/-1">
+        <div class="slot" style="aspect-ratio:21/9">
+          <span class="slot-no">Screenshot 05</span>
+          <div>
+            <h4>The behaviour spec itself</h4>
+            <ul>
+              <li>A page of the written conversation design — scaffolding levels, escalation rules, boundary handling</li>
+              <li>Annotate two or three lines by hand if you can; a marked-up document reads as craft</li>
+              <li>Legible at half size, or crop to a single section</li>
+            </ul>
+          </div>
+          <span class="spec">1800 × 780 · the artefact that proves the approach</span>
+        </div>
+        <figcaption>Working alphas are common. A written specification for how a product should behave when it doesn't know the answer is rarer, and it is the part I would show first.</figcaption>
+      </figure>
+
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== STACK ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The stack</p>
+      <h2>Boring on purpose.</h2>
+      <p>I'm a designer who codes carefully, not an engineer. Every technology choice was made to be unremarkable, so that the risk in this project sat in the design work rather than the infrastructure.</p>
+    </div>
+
+    <div class="stack">
+      <div class="row">
+        <span class="role">Application</span><span class="pick">Next.js 14 · TypeScript</span>
+        <p class="why">One framework for the guest surface, the host console and the API. Nothing to wire together.</p>
+      </div>
+      <div class="row">
+        <span class="role">Interface</span><span class="pick">Tailwind · shadcn/ui</span>
+        <p class="why">Components I could trust so my attention stayed on the conversation rather than on building a date picker.</p>
+      </div>
+      <div class="row">
+        <span class="role">Reasoning</span><span class="pick">Claude</span>
+        <p class="why">Runs the behaviour spec, holds the property knowledge, decides when to ask, when to instruct and when to hand over.</p>
+      </div>
+      <div class="row">
+        <span class="role">Voice out</span><span class="pick">ElevenLabs</span>
+        <p class="why">Text to speech. The voice matters far less than the timing, which is the harder problem underneath it.</p>
+      </div>
+      <div class="row">
+        <span class="role">Voice in</span><span class="pick">Web Speech API</span>
+        <p class="why">Browser-native, so guests need no app and no permissions beyond the microphone.</p>
+      </div>
+      <div class="row">
+        <span class="role">Vision</span><span class="pick">Photo → appliance</span>
+        <p class="why">Reads the badge, identifies the model, retrieves the manual, drafts the guide. The whole setup experience rests on this.</p>
+      </div>
+      <div class="row">
+        <span class="role">Data</span><span class="pick">SQLite · JSON</span>
+        <p class="why">Bookings in SQLite, property knowledge in structured JSON. Deliberately simple for one property, and deliberately temporary.</p>
+      </div>
+      <div class="row">
+        <span class="role">Queued next</span><span class="pick">Postgres · pgvector</span>
+        <p class="why">Retrieval instead of sending the entire knowledge base on every message — the change that decides whether the economics work.</p>
+      </div>
+      <div class="row">
+        <span class="role">Queued next</span><span class="pick">SMS fallback</span>
+        <p class="why">Regional properties have unreliable reception. A concierge that only works on good wifi is not a concierge in the Hunter Valley.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== NUMBERS ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The numbers I ran</p>
+      <h2>Would this actually<br>be a business?</h2>
+      <p>Not a plan, a sanity check. I wanted to know whether the thing I was enjoying building could pay for itself before I spent another six months on it.</p>
+    </div>
+
+    <div class="ledgers">
+      <div class="ledger">
+        <h3>The market</h3>
+        <div class="l"><span class="k">Active short-term rentals, Australia and New Zealand</span><span class="v">~150,000</span></div>
+        <div class="l"><span class="k">Entry segment — managers with 20 to 200 properties</span><span class="v">20–200</span></div>
+        <div class="l"><span class="k">Wholesale price explored, per property</span><span class="v">A$29 / mo</span></div>
+        <div class="l"><span class="k">A single 50-property manager</span><span class="v">A$17,400 / yr</span></div>
+        <div class="l total"><span class="k">One per cent of ANZ listings</span><span class="v">~A$520,000 ARR</span></div>
+      </div>
+
+      <div class="ledger">
+        <h3>Unit economics · that same 50-property account</h3>
+        <div class="l"><span class="k">Revenue</span><span class="v">A$1,450 / mo</span></div>
+        <div class="l"><span class="k">Model, voice, hosting, support</span><span class="v">A$130–230 / mo</span></div>
+        <div class="l"><span class="k">Gross margin</span><span class="v">57–76%</span></div>
+        <div class="l total"><span class="k">Hours returned to the manager</span><span class="v">~35 / mo</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(34px,4.5vw,54px)" class="mini rise">
+      <div class="turn">
+        <div>
+          <p class="speaker">What the numbers changed</p>
+          <div class="speech answer"><p>The price is not the lever. Cost per conversation is. Sending the whole knowledge base to the model on every single message was quietly the largest threat to the margin — and it only shows up once you multiply it by a thousand properties.</p></div>
+        </div>
+        <aside class="mark">
+          <span>This is why retrieval and caching sat on the beta list. Not for speed. For survival.</span>
+          <span>It also reframed the roadmap: the technical work worth doing next was the invisible kind.</span>
+        </aside>
+      </div>
+    </div>
+
+    <div class="mini rise">
+      <div class="turn">
+        <div>
+          <p class="speaker">The buyer's side of it</p>
+          <div class="speech answer"><p>Fifty properties generate roughly 750 guest messages a month. Automating around 70% of them at four minutes each returns about 35 hours — against a bill of A$1,450.</p></div>
+        </div>
+        <aside class="mark">
+          <span>An ROI a manager can check on the back of an envelope is worth more than any feature list.</span>
+          <span>And the margin holds because the manager, not me, carries the cost of setup and the relationship with the owner.</span>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== STATUS ===================== -->
+<div class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">Where it got to</p>
+      <h2>Alpha complete. Beta ready.</h2>
+      <p>Proven on my own property, then scoped for real guests with a property manager — with the measures agreed before launch rather than after.</p>
+    </div>
+
+    <div class="status">
+      <div class="item">
+        <p class="k">Alpha · complete</p>
+        <p>Voice and text, booking-aware, host console, photo-driven setup. Property-agnostic architecture — one behaviour spec, any property's knowledge injected at runtime, so adding a house is a data problem rather than a rewrite.</p>
+      </div>
+      <div class="item">
+        <p class="k">Beta · scoped</p>
+        <p>A managed property in the Hunter Valley, real bookings, real guests. Every conversation manually reviewed in week one, with a fifteen-minute daily check-in with the manager.</p>
+      </div>
+      <div class="item">
+        <p class="k">Measured by</p>
+        <p>The manager's interruptions per week, counted before and after. Whether guests use the concierge instead of calling. Accuracy of what it told them. Not usage volume.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:clamp(44px,6vw,72px)" class="pull">Anyone can load a knowledge base. The hard part, and the whole product, is how it talks.</p>
+  </section>
+</div>
+
+<hr class="rule">
+
+<!-- ===================== REFLECTION ===================== -->
+<div class="wrap">
+  <section class="section" style="padding-bottom:clamp(30px,4vw,50px)">
+    <div class="section-head">
+      <p class="eyebrow">Reflection</p>
+      <h2>What I took from it.</h2>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">One</p>
+      <h3>Prototypes are cheap now, and that changes what design work is</h3>
+    </div>
+    <div>
+      <p>I built this with Claude as a pair, and the honest surprise was the pace. Something I would previously have written a brief about was a working thing by the end of a weekend. That mattered less as a productivity gain than as a change in method: I could hold the product, break it, and feel exactly where a conversation went wrong.</p>
+      <p>No amount of sketching would have told me that the concierge asking "anything else?" after a smoke alarm feels awful. Using it did, immediately.</p>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Two</p>
+      <h3>It moved the making, not the knowing</h3>
+    </div>
+    <div>
+      <p>This confirmed something I already believed rather than teaching me something new. AI collapsed the distance between an idea and a prototype, and did almost nothing for the part that decided whether the product was any good — working out which problem was worth solving, and what a person actually needs in the moment they hit it.</p>
+      <p>Every decision on this page came from somewhere a model could not reach. Hosting my own guests. The specific irritation of a message at 11pm. Two long conversations with property managers about what they would genuinely put in front of a paying customer. The research got faster. Connecting the emotional dots did not.</p>
+      <div class="mini" style="margin-top:1.5rem">
+        <div class="turn">
+          <div>
+            <p class="speaker">The turn that mattered</p>
+            <div class="speech answer"><p>The product got good the moment I stopped asking what the technology could do and started asking what a tired person needs at 11.41pm.</p></div>
+          </div>
+          <aside class="mark"><span>Curiosity, lived experience and human understanding are still the scarce inputs. What got cheaper was the distance between an idea and something you can hold.</span></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Three</p>
+      <h3>A prototype is not a product</h3>
+    </div>
+    <div>
+      <p>The distance between an idea and a working thing collapsed. The distance between a working thing and something you can put in front of paying guests, every night, did not move at all.</p>
+      <p>That second gap is engineering, and it is not the kind you improvise your way through. An architecture that keeps cost per conversation from eating the margin. Retrieval, so the whole knowledge base isn't sent to the model on every message. A data layer that survives a hundred properties instead of one. Reliability at 11.41pm, when the entire promise is that somebody answers.</p>
+      <p>Fast prototyping made me confident about what to build. It did not make me qualified to run it, and pretending otherwise is how side projects become other people's outages.</p>
+    </div>
+  </section>
+
+  <section class="decision rise">
+    <div class="d-head">
+      <p class="kicker">Four</p>
+      <h3>Why I stopped here</h3>
+    </div>
+    <div>
+      <p>Not for lack of enjoyment, and not because it failed. I could see precisely what the next step required, and it was a real step up: engineering experience I don't have, or the money to buy it, and the years that come attached.</p>
+      <p>I have run that life before and I do not need to tick the entrepreneur box again. Running a software business — the funding, the support rota, all of it — is not what appeals to me at this stage, and stopping because the next chapter isn't the one you want is a better reason than continuing because you already started.</p>
+      <p>I may come back to it. In the meantime it did what a pet project should. It taught me a way of working, it proved a thesis I will carry into other products, and it made me a considerably better designer of things that talk.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap f-grid">
+    <div>
+      <p class="eyebrow" style="margin-bottom:.6rem">Pet project · 2026</p>
+      <p style="font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:-.025em;line-height:1.1;max-width:20ch;margin:0">Design, product strategy and build — Caroline Maillols</p>
+    </div>
+    <div class="mono">
+      Sydney, Australia<br>
+      Concept, conversation design, UI, build<br>
+      Nights and weekends
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = document.querySelectorAll('.rise');
+  if(reduce || !('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  items.forEach(function(el){ io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
