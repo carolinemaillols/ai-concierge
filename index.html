@@ -7,12 +7,12 @@
 <meta name="description" content="A pet project: an AI voice concierge for short-term rentals, built solo on my own Airbnb. The defensible thing was never the knowledge base. It was how it talks.">
 
 <!-- ============================================================
-     REPLACING THE SCREENSHOT PLACEHOLDERS
-     Each placeholder looks like:
-       <div class="slot"> ... </div>
-     Replace the whole block with:
-       <img class="shot" src="images/your-file.png" alt="Short description">
-     Keep the <figcaption> underneath — it does real work.
+     SCREENSHOTS — nine files, sitting beside index.html:
+       guest-chat.png          appliance-photos.png
+       appliance-knowledge.png nearby-places.png
+       bookings.png            host-picks.png
+       dashboard.png           difficulty-rating.png
+       behaviour-spec.png
      ============================================================ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -485,6 +485,10 @@ footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-
           <aside class="mark"><span>Stops the two failure modes at once: giving up on someone too early, and letting them flounder for fifteen minutes on something genuinely hard.</span></aside>
         </div>
       </div>
+      <figure style="margin-top:1rem">
+        <img class="shot" src="difficulty-rating.png" alt="Appliance editor showing the one to five difficulty selector">
+        <figcaption>Set once, per appliance, during setup. The coffee machine sits at 3.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -613,6 +617,21 @@ footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-
       </div>
     </div>
 
+    <div style="display:grid;gap:clamp(20px,3vw,32px);grid-template-columns:repeat(auto-fit,minmax(270px,1fr));margin-top:clamp(30px,4vw,44px)">
+      <figure>
+        <img class="shot" src="appliance-photos.png" alt="Two uploaded appliance photos with analyse buttons">
+        <figcaption>Photograph. One close-up of the controls, one wider shot of where it sits — the second is what lets the concierge tell a guest where to walk.</figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="nearby-places.png" alt="Nearby places fetched automatically from the property address">
+        <figcaption>Tap. The address alone produces the local layer, drafted and waiting for the host to keep or cut.</figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="host-picks.png" alt="Host recommendations with personal notes">
+        <figcaption>Talk. The part nothing can infer — the host's own picks, in their own words.</figcaption>
+      </figure>
+    </div>
+
     <div style="margin-top:clamp(34px,4.5vw,54px)" class="mini rise">
       <div class="turn">
         <div>
@@ -643,84 +662,28 @@ footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-
     <div class="shots">
 
       <figure>
-        <div class="slot">
-          <span class="slot-no">Screenshot 01</span>
-          <div>
-            <h4>Guest chat, mid-troubleshoot</h4>
-            <ul>
-              <li>Four or five turns visible, not one</li>
-              <li>Show the concierge asking a question back</li>
-              <li>Mobile frame — that is where guests are</li>
-              <li>Use a real appliance from the house</li>
-            </ul>
-          </div>
-          <span class="spec">1200 × 750 · replace this block with &lt;img class="shot"&gt;</span>
-        </div>
-        <figcaption>The guest surface. No app, no account — a link in the check-in message.</figcaption>
+        <img class="shot" src="guest-chat.png" alt="Guest chat answering where the coffee machine is">
+        <figcaption>The guest surface. No app, no account — a link in the check-in message. Note the order of the answer: it places the machine against the brick wall, between the sink and the doorway, before it says a word about how to use it.</figcaption>
       </figure>
 
       <figure>
-        <div class="slot">
-          <span class="slot-no">Screenshot 02</span>
-          <div>
-            <h4>Photo → appliance, awaiting approval</h4>
-            <ul>
-              <li>The uploaded photo beside the drafted fields</li>
-              <li>Model number, difficulty rating, safety notes filled</li>
-              <li>Approve state clearly unpressed</li>
-            </ul>
-          </div>
-          <span class="spec">1200 × 750 · the money shot — show the draft, not the result</span>
-        </div>
-        <figcaption>Setup. The system does the typing; the host does the deciding.</figcaption>
+        <img class="shot" src="appliance-knowledge.png" alt="Knowledge base entry showing quirks, common issues and manual content">
+        <figcaption>What sits behind a single appliance. Safety notes, quirks, the issues guests actually hit, and the consolidated manual the concierge reasons from.</figcaption>
       </figure>
 
       <figure>
-        <div class="slot">
-          <span class="slot-no">Screenshot 03</span>
-          <div>
-            <h4>Voice, mid-listen</h4>
-            <ul>
-              <li>Capture the active listening state, not idle</li>
-              <li>Transcript partially formed underneath</li>
-              <li>Crop tight — this one is about the moment</li>
-            </ul>
-          </div>
-          <span class="spec">1200 × 750</span>
-        </div>
-        <figcaption>Voice in, voice out. Hands full, arms full of luggage, lights off.</figcaption>
+        <img class="shot" src="bookings.png" alt="Bookings list showing party composition and guest notes">
+        <figcaption>Bookings carry party composition and notes, so the concierge knows there is a baby in the house before anyone mentions it.</figcaption>
       </figure>
 
       <figure>
-        <div class="slot">
-          <span class="slot-no">Screenshot 04</span>
-          <div>
-            <h4>Booking-aware personalisation</h4>
-            <ul>
-              <li>Booking record on one side, greeting on the other</li>
-              <li>Guest name, dates and party size visibly in play</li>
-              <li>Redact the real guest's surname</li>
-            </ul>
-          </div>
-          <span class="spec">1200 × 750</span>
-        </div>
-        <figcaption>The concierge knows who is in the house, how long for, and whether there are children.</figcaption>
+        <img class="shot" src="dashboard.png" alt="Admin dashboard listing properties and knowledge bases">
+        <figcaption>The host console. Two properties running side by side — the point at which the architecture had to stop being about one house.</figcaption>
       </figure>
 
       <figure style="grid-column:1/-1">
-        <div class="slot" style="aspect-ratio:21/9">
-          <span class="slot-no">Screenshot 05</span>
-          <div>
-            <h4>The behaviour spec itself</h4>
-            <ul>
-              <li>A page of the written conversation design — scaffolding levels, escalation rules, boundary handling</li>
-              <li>Annotate two or three lines by hand if you can; a marked-up document reads as craft</li>
-              <li>Legible at half size, or crop to a single section</li>
-            </ul>
-          </div>
-          <span class="spec">1800 × 780 · the artefact that proves the approach</span>
-        </div>
-        <figcaption>Working alphas are common. A written specification for how a product should behave when it doesn't know the answer is rarer, and it is the part I would show first.</figcaption>
+        <img class="shot" src="behaviour-spec.png" alt="A page of the written behaviour specification">
+        <figcaption>A page of the behaviour spec: level transitions, frustration signals, the troubleshooting hierarchy. Working alphas are common. A written specification for how a product should behave when it doesn't know the answer is rarer, and it is the part I would show first.</figcaption>
       </figure>
 
     </div>
@@ -884,7 +847,7 @@ footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-
       <h3>Prototypes are cheap now, and that changes what design work is</h3>
     </div>
     <div>
-      <p>I built this with Claude as a pair, and the honest surprise was the pace. Something I would previously have written a brief about was a working thing by the end of a weekend. That mattered less as a productivity gain than as a change in method: I could hold the product, break it, and feel exactly where a conversation went wrong.</p>
+      <p>I built this with Claude as a pair, and the honest surprise was the pace. Something I would previously have written a brief about was a working thing by the end of a weekend. That mattered less as a productivity gain than as a change in method: I could hold the product, break it, and feel exactly where a conversation went wrong. Learning to work with the tool properly happened the same way — not by reading about it, but by building something real and getting it wrong a few times.</p>
       <p>No amount of sketching would have told me that the concierge asking "anything else?" after a smoke alarm feels awful. Using it did, immediately.</p>
     </div>
   </section>
@@ -928,7 +891,7 @@ footer .mono{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-
     </div>
     <div>
       <p>Not for lack of enjoyment, and not because it failed. I could see precisely what the next step required, and it was a real step up: engineering experience I don't have, or the money to buy it, and the years that come attached.</p>
-      <p>I have run that life before and I do not need to tick the entrepreneur box again. Running a software business — the funding, the support rota, all of it — is not what appeals to me at this stage, and stopping because the next chapter isn't the one you want is a better reason than continuing because you already started.</p>
+      <p>I built this because I am a problem-solver, and the part I love is finding the gap in an experience, sitting with the people living it, and designing something that closes it. That part I did, and it was a genuine pleasure. What comes next is a different job, and I am not certain yet where that one leads. Having been an entrepreneur before, I know its shape well enough to know it is not where I am right now.</p>
       <p>I may come back to it. In the meantime it did what a pet project should. It taught me a way of working, it proved a thesis I will carry into other products, and it made me a considerably better designer of things that talk.</p>
     </div>
   </section>
